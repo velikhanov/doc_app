@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -9,10 +10,8 @@ class HomeTabs extends StatefulWidget {
 }
 
 class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
-  // final CollectionReference collectionReference =
-  //     FirebaseFirestore.instance.collection('doc_categories');
   final Stream<QuerySnapshot> _category = FirebaseFirestore.instance.collection('category').snapshots();
-  // final TextEditingController _textEditingController = TextEditingController();
+  
   @override
   Widget build(BuildContext context) {
     TabController _tabController = TabController(length: 3, vsync: this);
@@ -52,11 +51,83 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
             physics: const NeverScrollableScrollPhysics(),
             children: <Widget>[
               /////
-                StreamBuilder<QuerySnapshot>(
-                  stream: _category,
-                  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Column(
+              StreamBuilder<QuerySnapshot>(
+                stream: _category,
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if(snapshot.hasError) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const <Widget>[
+                        Flexible(
+                          child: Text(
+                            "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже", 
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  if(snapshot.connectionState == ConnectionState.waiting) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const <Widget>[
+                        Flexible(
+                          child: Text(
+                            "Загрузка данных, пожалуйста, подождите..", 
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  if(snapshot.hasData){
+                    return SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                        Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                          return Card(
+                            margin: const EdgeInsets.all(12),
+                            elevation: 4,
+                            color: const Color.fromRGBO(64, 75, 96, .9),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                              child: Row(
+                                children: <Widget>[
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
+                                      // Text(data['category'], style: const TextStyle(color: Colors.white70)),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  CircleAvatar(
+                                    // backgroundColor: Colors.white,
+                                    backgroundImage: 
+                                    data['img'] != "" &&  data['img'] != null && data['img'].length > 0 ?
+                                    AssetImage('assets/images/' + data['img'])
+                                    : const AssetImage('assets/images/home_img.png')
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }else{
+                    return Expanded(
+                    child:
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const <Widget>[
                           Flexible(
@@ -67,102 +138,15 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                             ),
                           ),
                         ],
-                      );
-                    }
-
-                    if(snapshot.connectionState == ConnectionState.waiting && DateTime.now().difference(DateTime.now()).inSeconds > 1) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const <Widget>[
-                          Flexible(
-                            child: Text(
-                              "Загрузка данных, пожалуйста, подождите", 
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: snapshot.hasData ? snapshot.data!.docs.map(
-                      (DocumentSnapshot document) {
-                      Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-                        return Card(
-                          margin: const EdgeInsets.all(12),
-                          elevation: 4,
-                          color: const Color.fromRGBO(64, 75, 96, .9),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                            child: Row(
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 4),
-                                    // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
-                                    // Text(data['category'], style: const TextStyle(color: Colors.white70)),
-                                  ],
-                                ),
-                                const Spacer(),
-                                const CircleAvatar(backgroundColor: Colors.white),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList() : <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
-                            Flexible(
-                              child: Text(
-                                "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже", 
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     );
-                  },
-                ),
+                  }
+                },
+              ),
               /////
-              const Expanded( child: Text('1'),
-                  // child: ElevatedButton(
-                  //     onPressed: () async {
-                  //       await collectionReference.add({'name': _textEditingController.text}).then((value) => _textEditingController.clear());
-                  //     },
-                  //     child: const Text(
-                  //       'Add Data',
-                  //       style: TextStyle(fontSize: 20),
-                  //     )),
-                ),
-              //
-              const Expanded(child: Text(''),),
-              // Expanded(
-              //   child: StreamBuilder(
-              //     stream: collectionReference.snapshots(),
-              //     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              //       if(snapshot.hasData){
-              //         return ListView(
-              //           children: snapshot.data!.docs.map((e) => Column(
-              //             children: [
-              //               ListTile(title: Text(e['name']),),
-              //               Divider(color: Colors.black.withOpacity(0.6), thickness: 2,)
-              //             ],
-              //           )).toList(),
-              //         );
-              //       }
-              //     return const Center(child: CircularProgressIndicator(),);
-              //     },
-              //   ),
-              // ),
-              
+              const Text('1'),
+              /////
+              const Text('2'),
               /////
             ],
           ),
