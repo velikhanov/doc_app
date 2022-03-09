@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:doc_app/pages/test_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -91,33 +92,41 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: snapshot.data!.docs.map((DocumentSnapshot document) {
                         Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-                          return Card(
-                            margin: const EdgeInsets.all(12),
-                            elevation: 4,
-                            color: const Color.fromRGBO(64, 75, 96, .9),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                              child: Row(
-                                children: <Widget>[
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 4),
-                                      // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
-                                      // Text(data['category'], style: const TextStyle(color: Colors.white70)),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  CircleAvatar(
-                                    // backgroundColor: Colors.white,
-                                    backgroundImage: 
-                                    data['img'] != "" &&  data['img'] != null && data['img'].length > 0 ?
-                                    AssetImage('assets/images/' + data['img'])
-                                    : const AssetImage('assets/images/home_img.png')
-                                  ),
-                                ],
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const TestPage()),
+                              );
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.all(12),
+                              elevation: 4,
+                              color: const Color.fromRGBO(64, 75, 96, .9),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                                child: Row(
+                                  children: <Widget>[
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 4),
+                                        // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
+                                        // Text(data['category'], style: const TextStyle(color: Colors.white70)),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    CircleAvatar(
+                                      // backgroundColor: Colors.white,
+                                      backgroundImage: 
+                                      data['img'] != "" &&  data['img'] != null && data['img'].length > 0 ?
+                                      AssetImage('assets/images/' + data['img'])
+                                      : const AssetImage('assets/images/home_img.png')
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
