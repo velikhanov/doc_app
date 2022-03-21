@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:doc_app/pages/calendar_page.dart';
 import 'package:doc_app/pages/doc_page.dart';
 import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/pages/test_page.dart';
@@ -66,7 +67,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
               ),
               Tab(
                 icon: Icon(Icons.calendar_today),
-                text: 'График',
+                text: 'Календарь',
               ),
             ],
           ),
@@ -216,7 +217,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
               /////
               const Text('1'),
               /////
-              const Text('2'),
+              const CalendarPage(),
               /////
             ],
           ),

@@ -1,4 +1,3 @@
-import 'package:doc_app/pages/test_page.dart';
 import 'package:doc_app/widgets/home_tabs.dart';
 import 'package:doc_app/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
@@ -21,19 +20,6 @@ class _HomePageState extends State<HomePage> {
           HomeTabs(),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: const Icon(
-      //     Icons.add,
-      //   ),
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (context) => const TestPage()),
-      //     );
-      //   },
-      //   elevation: 5,
-      //   tooltip: 'Подсказка',
-      // ),
     );
   }
 }

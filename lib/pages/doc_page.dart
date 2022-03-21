@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doc_app/api/get_data.dart';
+import 'package:doc_app/pages/chat_page.dart';
 import 'package:flutter/material.dart';
 
 class DocPage extends StatelessWidget {
+
   final String _collection;
   final int _id;
 
@@ -35,10 +37,7 @@ class DocPage extends StatelessWidget {
                     color: const Color.fromARGB(255, 33, 124, 243),
                     child: IconButton(
                       onPressed: (() => Navigator.pop(context)),
-                      icon: const Icon(
-                        Icons.arrow_back_sharp,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.arrow_back_sharp, color: Colors.white,),
                     ),
                   ),
                 ],
@@ -164,6 +163,33 @@ class DocPage extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            ),
+                            Card(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 120.0),
+                              child: TextButton(
+                                onPressed: (() => Navigator.push(
+                                    context,
+                                    // MaterialPageRoute(builder: (context) => const ChatPage(),
+                                    MaterialPageRoute(builder: (context) => const ChatPage(),
+                                ))),
+                                // onPressed: (){},
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.chat_rounded,
+                                    color: Colors.teal,
+                                  ),
+                                  title: Text(
+                                    'Чат',
+                                    style: TextStyle(
+                                      fontSize: 20.0,
+                                      fontFamily: 'SourceSansPro',
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal.shade900,
+                                    ),
+                                  ),
+                                ),
+                              )
                             ),
                           ],
                         ),
