@@ -47,6 +47,10 @@ class _SignUpPageContent extends State<SignUpPageContent> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordControllerConf = TextEditingController();
+  bool isdoc = false;
+  var items =  ['Терапевт','Лор','Иммунолог'];
+  String dropdownvalue = 'Терапевт';
+
   bool _isVisible = false;
   bool _isObscure1 = true;
   bool _isObscure2 = true;
@@ -163,7 +167,6 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                       _isVisible = false;
                     });
                   },
-
                   controller: passwordControllerConf, // Controller for Password
                   decoration: InputDecoration(
                       border: InputBorder.none,
@@ -185,7 +188,52 @@ class _SignUpPageContent extends State<SignUpPageContent> {
               ],
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              isdoc == true ? const Text('Я врач', style: TextStyle(color: Colors.white, fontSize: 17.5,)) : const Text('Я пациент', style: TextStyle(color: Colors.white, fontSize: 17.5,)),
+              Switch(
+                value: isdoc,
+                onChanged: (value) {
+                  setState(() {
+                    isdoc = value;
+                  });
+                },
+                activeTrackColor: Colors.lightGreenAccent, 
+                activeColor: Colors.green,
+              ),
+            ],
+          ),
+          isdoc == true 
+          ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Категория', style: TextStyle(color: Colors.white, fontSize: 17.5,)),
+              const SizedBox(width: 15,),
+              DropdownButton(
+                value: dropdownvalue,
+                style: const TextStyle(color: Colors.white, fontSize: 17.5,),
+                alignment: AlignmentDirectional.center,
+                dropdownColor: Colors.black,
+                  icon: const Icon(Icons.keyboard_arrow_down),
 
+                  items: items.map((String items) {
+                    return DropdownMenuItem(
+                        value: items,
+                        child: Text(items)
+                    );
+                  }
+                  ).toList(),
+
+                onChanged: (newValue){
+                  setState(() {
+                    dropdownvalue = newValue.toString();
+                  });
+                },
+              )
+            ],
+          )
+          : const SizedBox(height: 0, width: 0,),
           // Signup Submit button
           Container(
             width: 570,
@@ -198,18 +246,20 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                 ),
               ),
               onPressed: () {
-                if(passwordController.text.trim() != passwordControllerConf.text.trim()){
+                if(passwordController.text.trim().isEmpty == true && passwordController.text.trim() != passwordControllerConf.text.trim()){
                   return;
                 }else{
                   FocusManager.instance.primaryFocus?.unfocus();
                   context.read<AuthenticationService>().signUp(
                     emailController.text.trim(),
                     passwordController.text.trim(),
+                    isdoc,
+                    1
                   );
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage(),
-                  ));
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => const HomePage(),
+                  // ));
                 }
               },
               child: const Text("Зарегистрироваться", style: TextStyle(color: Colors.white, fontSize: 20,)),

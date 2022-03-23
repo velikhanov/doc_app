@@ -178,10 +178,10 @@ class _SignInPageContent extends State<SignInPageContent> {
                   emailController.text.trim(),
                   passwordController.text.trim(),
                 );
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage(),
-                ));
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => const HomePage(),
+                // ));
             },
               child: const Text("Войти",
                   style: TextStyle(
