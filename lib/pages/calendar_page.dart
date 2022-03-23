@@ -27,11 +27,12 @@ class CalendarPage extends StatelessWidget {
                 ),
                 child: Text(
                   // DateFormat('MMMM yyyy').format(DateTime(year, month)),
-                  DateFormat.yMMMMd('ru').format(DateTime(year, month)),
+                  // DateFormat.yMMM('ru').format(DateTime(year, month)).toUpperCase(),
+                  DateFormat.yMMM('ru').format(DateTime(year, month))[0].toUpperCase() + DateFormat.yMMM('ru').format(DateTime(year, month)).substring(1),
                   style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                        color: Colors.white,
-                        fontSize: 20
-                      ),
+                    color: Colors.white,
+                    fontSize: 20
+                  ),
                 ),
               ),
 

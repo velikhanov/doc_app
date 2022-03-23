@@ -1,6 +1,8 @@
+// import 'package:doc_app/auth/auth_service.dart';
 import 'package:doc_app/widgets/home_tabs.dart';
 import 'package:doc_app/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,6 +22,12 @@ class _HomePageState extends State<HomePage> {
           HomeTabs(),
         ],
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   child: const Text('Action'),
+      //   onPressed: () {
+      //     context.read<AuthenticationService>().signOut();
+      //   },
+      // ),
     );
   }
 }

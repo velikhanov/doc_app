@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/pages/chat_page.dart';
+import 'package:doc_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
 class DocPage extends StatelessWidget {
@@ -38,6 +39,16 @@ class DocPage extends StatelessWidget {
                     child: IconButton(
                       onPressed: (() => Navigator.pop(context)),
                       icon: const Icon(Icons.arrow_back_sharp, color: Colors.white,),
+                    ),
+                  ),
+                  Material(
+                    color: const Color.fromARGB(255, 33, 124, 243),
+                    child: IconButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomePage(),
+                      )),
+                      icon: const Icon(Icons.home, color: Colors.white,),
                     ),
                   ),
                 ],

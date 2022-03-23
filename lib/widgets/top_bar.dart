@@ -1,4 +1,7 @@
+import 'package:doc_app/auth/auth_service.dart';
+import 'package:doc_app/auth/signin_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class TopBar extends StatelessWidget {
   const TopBar({Key? key}) : super(key: key);
@@ -26,16 +29,29 @@ class TopBar extends StatelessWidget {
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const <Widget>[
-                CircleAvatar(
+              children: <Widget>[
+                const CircleAvatar(
                   backgroundColor: Color.fromRGBO(0, 0, 255, 0),
                   child: IconButton(
                     onPressed: null,
                     color: Colors.white,
-                    icon: Icon(Icons.dehaze),
+                    icon: Icon(Icons.settings, color: Colors.white, size: 27.5,),
                   ),
                 ),
-                Text('EN'),
+                CircleAvatar(
+                  backgroundColor: const Color.fromRGBO(0, 0, 255, 0),
+                  child: IconButton(
+                    onPressed: () {
+                      context.read<AuthenticationService>().signOut();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SignInPage(),
+                      ));
+                    },
+                    color: Colors.white,
+                    icon: const Icon(Icons.logout),
+                  ),
+                ),
               ],
             ),
             Row(
