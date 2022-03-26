@@ -1,8 +1,11 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/auth/auth_service.dart';
 import 'package:doc_app/auth/signin_page.dart';
-import 'package:doc_app/pages/home_page.dart';
+import 'package:doc_app/main.dart';
+// import 'package:doc_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -48,9 +51,14 @@ class _SignUpPageContent extends State<SignUpPageContent> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordControllerConf = TextEditingController();
   bool isdoc = false;
-  var items =  ['Терапевт','Лор','Иммунолог'];
+  final Future<QuerySnapshot> _items = getCategoryData('categories/1/doctors', forMap: true);
+  int userId = 1;
+  int doctorId = 1;
+  var _docCount = getDoctorData('users', lastId: true);
+  bool firstOpen = true;
   String dropdownvalue = 'Терапевт';
-
+  int categoryId = 1;
+  String categoryName = '';
   bool _isVisible = false;
   bool _isObscure1 = true;
   bool _isObscure2 = true;
@@ -58,6 +66,17 @@ class _SignUpPageContent extends State<SignUpPageContent> {
 
   @override
   Widget build(BuildContext context) {
+    if(firstOpen == true && isdoc == true){
+      _docCount.then((val){
+        doctorId = val.size + 1;
+      });
+    }
+
+    if(isdoc == false){
+      _docCount.then((val){
+        userId = val.size + 1;
+      });
+    }
     return SingleChildScrollView(
       reverse: true,
       padding: const EdgeInsets.all(20),
@@ -197,6 +216,13 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                 onChanged: (value) {
                   setState(() {
                     isdoc = value;
+                    if(firstOpen == true && isdoc == true){
+                      _docCount = getDoctorData('doctors/1/1', lastId: true);
+                    }else if(firstOpen == false && isdoc == false){
+                      _docCount = getDoctorData('users', lastId: true);
+                    }else{
+                      _docCount = getDoctorData('users', lastId: true);
+                    }
                   });
                 },
                 activeTrackColor: Colors.lightGreenAccent, 
@@ -205,34 +231,68 @@ class _SignUpPageContent extends State<SignUpPageContent> {
             ],
           ),
           isdoc == true 
-          ? Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Категория', style: TextStyle(color: Colors.white, fontSize: 17.5,)),
-              const SizedBox(width: 15,),
-              DropdownButton(
-                value: dropdownvalue,
-                style: const TextStyle(color: Colors.white, fontSize: 17.5,),
-                alignment: AlignmentDirectional.center,
-                dropdownColor: Colors.black,
-                  icon: const Icon(Icons.keyboard_arrow_down),
+          ? FutureBuilder<QuerySnapshot>(
+              future: _items,
+              builder: (_, snapshot) {
 
-                  items: items.map((String items) {
-                    return DropdownMenuItem(
-                        value: items,
-                        child: Text(items)
-                    );
-                  }
-                  ).toList(),
+                if (snapshot.hasError){
+                  return const Text('Ошибка во время загрузки категорий..', style: TextStyle(color: Colors.red, fontSize: 17.5), textAlign: TextAlign.center,);
+                }
 
-                onChanged: (newValue){
-                  setState(() {
-                    dropdownvalue = newValue.toString();
-                  });
-                },
-              )
-            ],
-          )
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Загрузка категорий..', style: TextStyle(color: Color.fromARGB(255, 88, 171, 238), fontSize: 17.5, ), textAlign: TextAlign.center,);
+                }
+
+                if (snapshot.hasData) {
+                  List<QueryDocumentSnapshot<Object?>> _data = snapshot.data!.docs;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Категория', style: TextStyle(color: Colors.white, fontSize: 17.5,)),
+                      const SizedBox(width: 15,),
+                      DropdownButton(
+                        value: dropdownvalue,
+                        style: const TextStyle(color: Colors.white, fontSize: 17.5,),
+                        alignment: AlignmentDirectional.center,
+                        dropdownColor: Colors.black,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+
+                          items: _data.map((items) {
+                            return DropdownMenuItem(
+                                value: items['category'],
+                                child: Text(items['category']),
+                                onTap: () => setState(() {
+                                  firstOpen = false;
+                                  categoryId = items['id_category'] as int;
+                                  categoryName = items['category'];
+                                  _docCount = getDoctorData('doctors/' + items['id_category'].toString() + '/' + items['id_category'].toString(), lastId: true);
+                                  _docCount.then((val){
+                                    doctorId = val.size + 1;
+                                  });
+                                }),
+                            );
+                          }).toList(),
+
+                        onChanged: (newValue){
+                          setState(() {
+                            dropdownvalue = newValue.toString();
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                }else{
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text('Категория', style: TextStyle(color: Colors.white, fontSize: 17.5,)),
+                      SizedBox(width: 15,),
+                      Text('Нет доступных категорий', style: TextStyle(color: Colors.white, fontSize: 17.5, decoration: TextDecoration.underline,)),
+                    ],
+                  );
+                }
+              }
+            )
           : const SizedBox(height: 0, width: 0,),
           // Signup Submit button
           Container(
@@ -246,19 +306,29 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                 ),
               ),
               onPressed: () {
-                if(passwordController.text.trim().isEmpty == true && passwordController.text.trim() != passwordControllerConf.text.trim()){
+                if(emailController.text.trim().isEmpty && passwordController.text.trim().isEmpty && passwordController.text.trim() != passwordControllerConf.text.trim()){
                   return;
                 }else{
                   FocusManager.instance.primaryFocus?.unfocus();
-                  context.read<AuthenticationService>().signUp(
-                    emailController.text.trim(),
-                    passwordController.text.trim(),
-                    isdoc,
-                    1
-                  );
+                  if(isdoc == true){
+                    context.read<AuthenticationService>().signUp(
+                      emailController.text.trim(),
+                      passwordController.text.trim(),
+                      isdoc: isdoc,
+                      categoryId: categoryId,
+                      doctorId: doctorId,
+                      categoryName: categoryName
+                    );
+                  }else{
+                    context.read<AuthenticationService>().signUp(
+                      emailController.text.trim(),
+                      passwordController.text.trim(),
+                      userId: userId
+                    );
+                  }
                   // Navigator.push(
                   //   context,
-                  //   MaterialPageRoute(builder: (context) => const HomePage(),
+                  //   MaterialPageRoute(builder: (context) => const MyApp(),
                   // ));
                 }
               },

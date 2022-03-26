@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthenticationService {
@@ -20,10 +21,11 @@ class AuthenticationService {
   /// This is to make it as easy as possible but a better way would be to
   /// use your own custom class that would take the exception and return better
   /// error messages. That way you can throw, return or whatever you prefer with that instead.
-  Future<String?> signIn(String email, String password) async {
+  Future<Object?> signIn(String email, String password) async {
     try {
-      await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-      return 'Signed in';
+      UserCredential result = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+      // return 'Signed in';
+      return result.user;
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
@@ -33,15 +35,27 @@ class AuthenticationService {
   /// This is to make it as easy as possible but a better way would be to
   /// use your own custom class that would take the exception and return better
   /// error messages. That way you can throw, return or whatever you prefer with that instead.
-  Future<String?> signUp(String email, String password, bool isdoc, int id_category) async {
+  Future<Object?> signUp(String email, String password,{bool isdoc = false, int categoryId = 1, String categoryName = 'Терапевт', int doctorId = 1, int userId = 1}) async {
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-      if(isdoc == true){
-
-      }else{
-
+      UserCredential _result = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      if(_result.user!.uid.isNotEmpty){
+        if(isdoc == true){
+          DocumentReference<Map<String, dynamic>> _doctor = FirebaseFirestore.instance.collection('doctors/' + categoryId.toString() + '/' + categoryId.toString()).doc(doctorId.toString());
+          _doctor.set({
+            'category': categoryName,
+            'id_category': categoryId.toInt(),
+            'id_doctor': doctorId.toInt(),
+            'email': email
+          });
+        }else{
+          DocumentReference<Map<String, dynamic>> _user = FirebaseFirestore.instance.collection('users').doc(userId.toString());
+          _user.set({
+            'email': email,
+            'user_id': userId
+          });
+        }
       }
-      return "Signed up";
+      return _result.user;
     } on FirebaseAuthException catch (e) {
       return e.message;
     }

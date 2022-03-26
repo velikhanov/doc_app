@@ -1,6 +1,7 @@
 import 'package:doc_app/auth/auth_service.dart';
 import 'package:doc_app/auth/signup_page.dart';
-import 'package:doc_app/pages/home_page.dart';
+import 'package:doc_app/main.dart';
+// import 'package:doc_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -178,10 +179,10 @@ class _SignInPageContent extends State<SignInPageContent> {
                   emailController.text.trim(),
                   passwordController.text.trim(),
                 );
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const HomePage(),
-                // ));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyApp(),
+                ));
             },
               child: const Text("Войти",
                   style: TextStyle(

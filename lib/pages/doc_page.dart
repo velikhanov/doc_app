@@ -15,7 +15,7 @@ class DocPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _query = getDoctorData(_collection, _id);
+    final _query = getDoctorData(_collection, id: _id);
     return DefaultTextStyle(
       style: const TextStyle(
         decoration: TextDecoration.none,
