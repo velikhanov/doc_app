@@ -45,13 +45,15 @@ class AuthenticationService {
             'category': categoryName,
             'id_category': categoryId.toInt(),
             'id_doctor': doctorId.toInt(),
-            'email': email
+            'email': email,
+            'UID': _result.user?.uid
           });
         }else{
           DocumentReference<Map<String, dynamic>> _user = FirebaseFirestore.instance.collection('users').doc(userId.toString());
           _user.set({
             'email': email,
-            'user_id': userId
+            'user_id': userId,
+            'UID': _result.user?.uid
           });
         }
       }
