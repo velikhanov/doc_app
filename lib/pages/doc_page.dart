@@ -2,8 +2,9 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doc_app/api/get_data.dart';
-import 'package:doc_app/pages/chat_page.dart';
+import 'package:doc_app/pages/chat_screen.dart';
 import 'package:doc_app/pages/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class DocPage extends StatelessWidget {
@@ -12,6 +13,24 @@ class DocPage extends StatelessWidget {
   final int _id;
 
   const DocPage(this._collection, this._id, {Key? key}) : super(key: key);
+
+  void _createChatSession(String userId, String docId){
+    Future<QuerySnapshot<Map<String, dynamic>>> _chatDocs = 
+    FirebaseFirestore.instance.collection('chats/' + docId.toString() + '/' + userId.toString()).get();
+    _chatDocs.then((value){
+        int newId = value.size == 0 ? 1 : value.size;
+        DocumentReference<Map<String, dynamic>> _chat = 
+        FirebaseFirestore.
+        instance.
+        collection('chats/' + docId.toString() + '/' + userId.toString()).
+        doc(newId.toString());
+        
+        _chat.set({
+          'user_id': userId,
+          'doc_id': docId
+        });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,11 +198,14 @@ class DocPage extends StatelessWidget {
                               margin: const EdgeInsets.symmetric(
                                   vertical: 10.0, horizontal: 120.0),
                               child: TextButton(
-                                onPressed: (() => Navigator.push(
+                                onPressed: (){
+                                  _createChatSession(_data!['uid'], FirebaseAuth.instance.currentUser!.uid);
+                                  Navigator.push(
                                     context,
                                     // MaterialPageRoute(builder: (context) => const ChatPage(),
-                                    MaterialPageRoute(builder: (context) => const ChatPage(),
-                                ))),
+                                    MaterialPageRoute(builder: (context) => ChatScreen(_data['uid'], _data['email']),
+                                  ));
+                                },
                                 // onPressed: (){},
                                 child: ListTile(
                                   leading: const Icon(

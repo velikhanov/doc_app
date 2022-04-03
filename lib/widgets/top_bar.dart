@@ -1,5 +1,6 @@
 import 'package:doc_app/auth/auth_service.dart';
 import 'package:doc_app/auth/signin_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -65,7 +66,8 @@ class TopBar extends StatelessWidget {
                       width: 75,
                       // height: 100,
                     ),
-                    const Text('Сан Саныч'),
+                    // const Text('Сан Саныч'),
+                    Text(FirebaseAuth.instance.currentUser!.email.toString(), textAlign: TextAlign.center,),
                   ],
                 ),
               ],

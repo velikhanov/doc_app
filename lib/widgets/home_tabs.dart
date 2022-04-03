@@ -1,11 +1,12 @@
 import 'dart:developer';
+
 import 'package:doc_app/pages/calendar_page.dart';
+import 'package:doc_app/pages/chats_page.dart';
 import 'package:doc_app/pages/doc_page.dart';
 import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/pages/test_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:provider/provider.dart';
 
 class HomeTabs extends StatefulWidget {
   const HomeTabs({Key? key}) : super(key: key);
@@ -81,9 +82,13 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
             physics: const NeverScrollableScrollPhysics(),
             children: <Widget>[
               /////
-              StreamBuilder<QuerySnapshot>(
-                stream: _category,
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              // StreamBuilder<QuerySnapshot>( 
+              FutureBuilder(
+                // stream: _category,
+                // builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                future: _category,
+                // builder: (_, snapshot) {
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if(snapshot.hasError) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -113,8 +118,8 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                       ],
                     );
                   }
-
                   if(snapshot.hasData){
+                    // var data = snapshot.data!.data();
                     return Column(
                       children: <Widget>[
                         _displayBack == true 
@@ -125,38 +130,40 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                             ),
                             tooltip: 'Назад',
                           )
-                        // Center( 
-                        //     child: BackButton(
-                        //       color: Colors.red,
-                        //       onPressed: _returnOneStep,
-                        //     ),
-                        //   )
                         : const SizedBox(height: 0),
                         SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                            // children: snapshot.data!.data()!.docs
+                            children: snapshot.data!.docs.map<Widget>((DocumentSnapshot document) {
                             Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
                               return GestureDetector(
-                                onTap: () => 
-                                data['is_subcat'] == null && data['is_nestedcat'] != null
-                                ? _initCategories('categories/' + data['id_category'].toString() + '/doctors')
-                                : data['is_subcat'] != null && data['is_nestedcat'] == null ? _initCategories('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString())
-                                : (data['is_nestedcat'] != null && data['is_nestedcat'] == true) || (data['is_nestedcat'] == null)
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => DocPage('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString(), data['id_doctor'])),
-                                )
-                                : data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'] == 2
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const TestPage()),
-                                ) : data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'] == 3
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const TestPage()),
-                                ) : null,
+                                onTap: () {
+                                  if(data['is_subcat'] == null && data['is_nestedcat'] != null && data['is_nestedcat'] == true){
+                                    _initCategories('categories/' + data['id_category'].toString() + '/doctors');
+                                  }else if(data['is_subcat'] != null && data['is_nestedcat'] == null){
+                                    _initCategories('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString());
+                                  }else if((data['is_nestedcat'] != null && data['is_nestedcat'] == true) || (data['is_nestedcat'] == null)){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => DocPage('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString(), data['id_doctor'])),
+                                    );
+                                  }else if(data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'].toInt() == 2){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const ChatsPage()),
+                                    );
+                                  }else if(data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'].toInt() == 3){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const TestPage()),
+                                    );
+                                  }else{
+                                    null;
+                                  }
+                                },
+                                
                                 child: Card(
                                   margin: const EdgeInsets.all(12),
                                   elevation: 4,
@@ -169,8 +176,10 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                            Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                            data['name'] != null ? Text(data['name'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400)) : const SizedBox(height: 0),
+                                              Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                              data['name'] != null && data['uid'] != null ? Text(data['name'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400)) : 
+                                              data['name'] == null && data['uid'] != null ? const Text('Доктор Айболит', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400))
+                                              : const SizedBox(height: 0),
                                             const SizedBox(height: 4),
                                             // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
                                             // Text(data['category'], style: const TextStyle(color: Colors.white70)),
@@ -196,8 +205,9 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                       ],
                     );
                   }else{
-                    return Expanded(
-                    child:
+                    return 
+                    // Expanded(
+                    // child:
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const <Widget>[
@@ -209,7 +219,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                             ),
                           ),
                         ],
-                      ),
+                      // ),
                     );
                   }
                 },

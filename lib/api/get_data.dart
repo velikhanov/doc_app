@@ -1,27 +1,70 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-getCategoryData(String _collection, {bool forMap = false}) {
-  if(forMap == false){
-    Stream<QuerySnapshot> _snapshot = FirebaseFirestore.instance.collection(_collection).snapshots();
+getCategoryData(String _collection) async {
+  QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
+      .instance
+      .collection('roles')
+      .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .get();
+      
+    for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
+      if (element.data()['role'] == 'd') {
+        Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
+            .collection(_collection)
+            .where('for_d', isEqualTo: true)
+            .get();
 
-    return _snapshot; 
-  }else{
-    Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance.collection(_collection).get();
+        return _snapshot;
+      } else if (element.data()['role'] == 'p') {
+        Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
+            FirebaseFirestore.instance.collection(_collection).get();
+
+        return _snapshot;
+      }
+    }
+}
+
+getCategoriesSignUp(String _collection){
+  Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
+            FirebaseFirestore.instance.collection(_collection).get();
+
+        return _snapshot;
+}
+
+getDoctorData(String _collection, {int? id, bool lastId = false}) {
+  if (lastId == false) {
+    Future<DocumentSnapshot> _snapshot = FirebaseFirestore.instance
+        .collection(_collection)
+        .doc(id.toString())
+        .get();
+
+    return _snapshot;
+  } else {
+    Future<QuerySnapshot> _snapshot =
+        FirebaseFirestore.instance.collection(_collection).get();
 
     return _snapshot;
   }
 }
 
-getDoctorData(String _collection, {int? id, bool lastId = false}) {
-  if(lastId == false){
-    Future<DocumentSnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore.instance.collection(_collection).doc(id.toString()).get();
+getUserRole(String _collection) {
+  Future<QuerySnapshot> _snapshot =
+      FirebaseFirestore.instance.collection(_collection).get();
 
-    return _snapshot;
-  }else{
-    Future<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore.instance.collection(_collection).get();
+  return _snapshot;
+}
 
-    return _snapshot;
-  }
+getUserData() {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _snapshop = FirebaseFirestore
+      .instance
+      .collection('users')
+      .where('uid', isEqualTo: user!.uid)
+      .get();
+
+  return _snapshop;
 }

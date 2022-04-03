@@ -51,14 +51,15 @@ class _SignUpPageContent extends State<SignUpPageContent> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordControllerConf = TextEditingController();
   bool isdoc = false;
-  final Future<QuerySnapshot> _items = getCategoryData('categories/1/doctors', forMap: true);
+  final Future<QuerySnapshot> _items = getCategoriesSignUp('categories/1/doctors');
   int userId = 1;
   int doctorId = 1;
+  int roleId = 1;
   var _docCount = getDoctorData('users', lastId: true);
+  final _roleCount = getUserRole('roles');
   bool firstOpen = true;
   String dropdownvalue = 'Терапевт';
   int categoryId = 1;
-  String categoryName = '';
   bool _isVisible = false;
   bool _isObscure1 = true;
   bool _isObscure2 = true;
@@ -66,6 +67,11 @@ class _SignUpPageContent extends State<SignUpPageContent> {
 
   @override
   Widget build(BuildContext context) {
+    if(firstOpen == true){
+    _roleCount.then((value){
+      roleId = value.size + 1;
+    });
+    }
     if(firstOpen == true && isdoc == true){
       _docCount.then((val){
         doctorId = val.size + 1;
@@ -264,7 +270,6 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                                 onTap: () => setState(() {
                                   firstOpen = false;
                                   categoryId = items['id_category'] as int;
-                                  categoryName = items['category'];
                                   _docCount = getDoctorData('doctors/' + items['id_category'].toString() + '/' + items['id_category'].toString(), lastId: true);
                                   _docCount.then((val){
                                     doctorId = val.size + 1;
@@ -317,13 +322,21 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                       isdoc: isdoc,
                       categoryId: categoryId,
                       doctorId: doctorId,
-                      categoryName: categoryName
+                      categoryName: dropdownvalue,
+                      // lastRole: _roleCount.then((value){
+                      //   value.size + 1;
+                      // })
+                      lastRole: roleId
                     );
                   }else{
                     context.read<AuthenticationService>().signUp(
                       emailController.text.trim(),
                       passwordController.text.trim(),
-                      userId: userId
+                      userId: userId,
+                      // lastRole: _roleCount.then((value){
+                      //   value.size + 1;
+                      // })
+                      lastRole: roleId
                     );
                   }
                   // Navigator.push(
