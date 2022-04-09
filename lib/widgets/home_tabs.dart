@@ -5,6 +5,7 @@ import 'package:doc_app/pages/chats_page.dart';
 import 'package:doc_app/pages/doc_page.dart';
 import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/pages/test_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -17,29 +18,30 @@ class HomeTabs extends StatefulWidget {
 
 class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
   var _category = getCategoryData('categories');
+  final _visitHistory = getVisitHistory(FirebaseAuth.instance.currentUser!.uid);
   final List<String> _stack = ['categories'];
   bool _displayBack = false;
 
-  void _initCategories(String _newCategory){
-    _displayBack = true; 
+  void _initCategories(String _newCategory) {
+    _displayBack = true;
     setState(() {
       _category = getCategoryData(_newCategory);
       _stack.add(_newCategory);
     });
   }
 
-  void _returnOneStep(){
-    if(_stack.length > 1){
+  void _returnOneStep() {
+    if (_stack.length > 1) {
       _stack.removeLast();
-    }else if(_stack.last == 'categories'){
+    } else if (_stack.last == 'categories') {
       return;
     }
     setState(() {
-      if(_stack.length > 1){
+      if (_stack.length > 1) {
         _category = getCategoryData(_stack.last);
-      }else{
+      } else {
         _category = getCategoryData('categories');
-        _displayBack = false; 
+        _displayBack = false;
       }
     });
   }
@@ -82,104 +84,157 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
             physics: const NeverScrollableScrollPhysics(),
             children: <Widget>[
               /////
-              // StreamBuilder<QuerySnapshot>( 
+              // StreamBuilder<QuerySnapshot>(
               FutureBuilder(
                 // stream: _category,
                 // builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 future: _category,
                 // builder: (_, snapshot) {
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if(snapshot.hasError) {
+                  if (snapshot.hasError) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже: ${snapshot.error.toString()}", 
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+                            "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже: ${snapshot.error.toString()}",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ],
                     );
                   }
-   
-                  if(snapshot.connectionState == ConnectionState.waiting) {
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const <Widget>[
                         Flexible(
                           child: Text(
-                            "Загрузка данных, пожалуйста, подождите..", 
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+                            "Загрузка данных, пожалуйста, подождите..",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ],
                     );
                   }
-                  if(snapshot.hasData){
+                  if (snapshot.hasData) {
                     // var data = snapshot.data!.data();
                     return Column(
                       children: <Widget>[
-                        _displayBack == true 
-                        ? IconButton(
-                            onPressed: _returnOneStep,
-                            icon: const Icon(
-                              Icons.arrow_back_sharp,
-                            ),
-                            tooltip: 'Назад',
-                          )
-                        : const SizedBox(height: 0),
+                        _displayBack == true
+                            ? IconButton(
+                                onPressed: _returnOneStep,
+                                icon: const Icon(
+                                  Icons.arrow_back_sharp,
+                                ),
+                                tooltip: 'Назад',
+                              )
+                            : const SizedBox(height: 0),
                         SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             // children: snapshot.data!.data()!.docs
-                            children: snapshot.data!.docs.map<Widget>((DocumentSnapshot document) {
-                            Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                            children: snapshot.data!.docs
+                                .map<Widget>((DocumentSnapshot document) {
+                              Map<String, dynamic> data =
+                                  document.data()! as Map<String, dynamic>;
                               return GestureDetector(
                                 onTap: () {
-                                  if(data['is_subcat'] == null && data['is_nestedcat'] != null && data['is_nestedcat'] == true){
-                                    _initCategories('categories/' + data['id_category'].toString() + '/doctors');
-                                  }else if(data['is_subcat'] != null && data['is_nestedcat'] == null){
-                                    _initCategories('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString());
-                                  }else if((data['is_nestedcat'] != null && data['is_nestedcat'] == true) || (data['is_nestedcat'] == null)){
+                                  if (data['is_subcat'] == null &&
+                                      data['is_nestedcat'] != null &&
+                                      data['is_nestedcat'] == true) {
+                                    _initCategories('categories/' +
+                                        data['id_category'].toString() +
+                                        '/doctors');
+                                  } else if (data['is_subcat'] != null &&
+                                      data['is_nestedcat'] == null) {
+                                    _initCategories('doctors/' +
+                                        data['id_category'].toString() +
+                                        '/' +
+                                        data['id_category'].toString());
+                                  } else if ((data['is_nestedcat'] != null &&
+                                          data['is_nestedcat'] == true) ||
+                                      (data['is_nestedcat'] == null)) {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => DocPage('doctors/' + data['id_category'].toString() + '/' + data['id_category'].toString(), data['id_doctor'])),
+                                      MaterialPageRoute(
+                                          builder: (context) => DocPage(
+                                              'doctors/' +
+                                                  data['id_category']
+                                                      .toString() +
+                                                  '/' +
+                                                  data['id_category']
+                                                      .toString(),
+                                              data['id_doctor'])),
                                     );
-                                  }else if(data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'].toInt() == 2){
+                                  } else if (data['is_nestedcat'] != null &&
+                                      data['is_nestedcat'] == false &&
+                                      data['id_category'].toInt() == 2) {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const ChatsPage()),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ChatsPage()),
                                     );
-                                  }else if(data['is_nestedcat'] != null && data['is_nestedcat'] == false && data['id_category'].toInt() == 3){
+                                  } else if (data['is_nestedcat'] != null &&
+                                      data['is_nestedcat'] == false &&
+                                      data['id_category'].toInt() == 3) {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const TestPage()),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TestPage()),
                                     );
-                                  }else{
+                                  } else {
                                     null;
                                   }
                                 },
-                                
                                 child: Card(
                                   margin: const EdgeInsets.all(12),
                                   elevation: 4,
                                   color: const Color.fromRGBO(64, 75, 96, .9),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 16),
                                     child: Row(
                                       children: <Widget>[
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                              Text(data['category'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                              data['name'] != null && data['uid'] != null ? Text(data['name'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400)) : 
-                                              data['name'] == null && data['uid'] != null ? const Text('Доктор Айболит', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400))
-                                              : const SizedBox(height: 0),
+                                            Text(data['category'],
+                                                style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            data['name'] != null &&
+                                                    data['uid'] != null
+                                                ? Text(data['name'],
+                                                    style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w400))
+                                                : data['name'] == null &&
+                                                        data['uid'] != null
+                                                    ? const Text(
+                                                        'Доктор Айболит',
+                                                        style: TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w400))
+                                                    : const SizedBox(height: 0),
                                             const SizedBox(height: 4),
                                             // Text(data['first_name']! + ' ' + data['second_name']!, style: const TextStyle(color: Colors.white70)),
                                             // Text(data['category'], style: const TextStyle(color: Colors.white70)),
@@ -192,7 +247,9 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                                           // TODO: to check if image file exists to avoid problem with image loading when image name is incorrect in DB
                                           // backgroundImage: data['img'] != "" && data['img'] != null
                                           // ? AssetImage('assets/images/' + data['img'])
-                                          // : const AssetImage('assets/images/home_img.png')
+                                          // : const AssetImage('assets/images/home_img.png'),
+                                          backgroundImage: AssetImage(
+                                              'assets/images/home_img.png'),
                                         ),
                                       ],
                                     ),
@@ -204,28 +261,138 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                         ),
                       ],
                     );
-                  }else{
-                    return 
-                    // Expanded(
-                    // child:
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const <Widget>[
-                          Flexible(
-                            child: Text(
-                              "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже", 
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
-                              textAlign: TextAlign.center,
+                  } else {
+                    return
+                        // Expanded(
+                        // child:
+                        Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const <Widget>[
+                        Flexible(
+                          child: Text(
+                            "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ],
+                        ),
+                      ],
                       // ),
                     );
                   }
                 },
               ),
               /////
-              const Text('1'),
+              FutureBuilder(
+                  future: _visitHistory,
+                  builder: (BuildContext context,
+                      AsyncSnapshot snapshot) {
+                    if (snapshot.hasError) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже: ${snapshot.error.toString()}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const <Widget>[
+                          Flexible(
+                            child: Text(
+                              "Загрузка данных, пожалуйста, подождите..",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    if (snapshot.hasData) {
+                      if(snapshot.data!.docs.isNotEmpty && (snapshot.data!.docs[0].data()['name'] != null)){
+                      return ListView.separated(
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(),
+                          itemCount: snapshot.data!.size,
+                          itemBuilder: (context, index) {
+                            var _data = snapshot.data!.docs[index].data();
+                            // _data = _data.data();
+                            // for (DocumentSnapshot document
+                            //     in snapshot.data!.docs) {
+                            //   Map<String, dynamic> _data =
+                            //       snapshot.data!.docs as Map<String, dynamic>;
+                              return Card(
+                                  color: const Color.fromARGB(255, 0, 115, 153),
+                                  child: ListTile(
+                                      title: Text(((_data['role'] == 'p') ? (_data['doc_category_name'] + ' - ' + _data['name']) : _data['name']),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      subtitle: Text(_data['date'],
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                      leading: const CircleAvatar(
+                                          backgroundImage: AssetImage(
+                                              'assets/images/home_img.png')),
+                                      // trailing: Icon(Icons.access_time_filled, color: Colors.black,)));
+                                      trailing: const Icon(
+                                        Icons.calendar_month,
+                                        color: Colors.black,
+                                      )));
+                            // }
+                            // }
+                          });
+                      }else{
+                        return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const <Widget>[
+                          Flexible(
+                            child: Text(
+                              'Пока что здесь пусто',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      );
+                      }
+                    } else {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const <Widget>[
+                          Flexible(
+                            child: Text(
+                              "Ошибка загрузки данных.\nПожалуйста, повторите попытку позже",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                        // ),
+                      );
+                    }
+                  }),
               /////
               const CalendarPage(),
               /////

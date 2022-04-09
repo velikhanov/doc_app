@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Get all categories according to the user's role on the home page
 getCategoryData(String _collection) async {
   QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
       .instance
@@ -27,6 +28,7 @@ getCategoryData(String _collection) async {
   }
 }
 
+// Mapping data for category selection on the registration page for doctors
 getCategoriesSignUp(String _collection) {
   Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
       FirebaseFirestore.instance.collection(_collection).get();
@@ -34,6 +36,7 @@ getCategoriesSignUp(String _collection) {
   return _snapshot;
 }
 
+// Get doctor's details on his personal page
 getDoctorData(String _collection, {int? id, bool lastId = false}) {
   if (lastId == false) {
     Future<DocumentSnapshot> _snapshot = FirebaseFirestore.instance
@@ -50,6 +53,7 @@ getDoctorData(String _collection, {int? id, bool lastId = false}) {
   }
 }
 
+// Get user role (doctor or patient)
 getUserRole(String _collection) {
   Future<QuerySnapshot> _snapshot =
       FirebaseFirestore.instance.collection(_collection).get();
@@ -57,24 +61,45 @@ getUserRole(String _collection) {
   return _snapshot;
 }
 
-// getChatMessages(String _collection) {
-//   Stream<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore
-//       .instance
-//       .collection(_collection)
-//       .orderBy('id_message', descending: true)
-//       .snapshots();
+// Get visit history list
 
-//   return _snapshot;
-// }
+getVisitHistory(String _currentUser) async {
+  QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
+      .instance
+      .collection('roles')
+      .where('uid', isEqualTo: _currentUser)
+      .get();
+
+  for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
+    if (element.data()['role'] == 'p') {
+      Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
+          .collection('visit_history')
+          .where('user_uid', isEqualTo: _currentUser)
+          .get();
+
+      return _snapshot;
+    } else if(element.data()['role'] == 'd') {
+      Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
+          .collection('todays_appointments')
+          .where('doc_uid', isEqualTo: _currentUser)
+          .get();
+          
+      return _snapshot;
+    }
+  }
+}
+
+// Specific chat data
 getChatMessages(String _collection) {
   Stream<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore
       .instance
       .collection(_collection)
       .orderBy('id_message', descending: true)
       .snapshots();
-    return _snapshot;
+  return _snapshot;
 }
 
+// All patient/doctor chats
 getChats(String _collection, String uid) async {
   QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
       .instance
@@ -96,6 +121,7 @@ getChats(String _collection, String uid) async {
         QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore
             .instance
             .collection('chats/' + uid + '/' + el.data()['member_2'])
+            .orderBy('id_message', descending: false)
             .get();
         if (_snapshot.docs.isNotEmpty) {
           _result.add(_snapshot.docs.last.data());
@@ -119,6 +145,7 @@ getChats(String _collection, String uid) async {
         QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore
             .instance
             .collection('chats/' + el.data()['member_1'] + '/' + uid)
+            .orderBy('id_message', descending: false)
             .get();
 
         if (_snapshot.docs.isNotEmpty) {

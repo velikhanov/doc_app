@@ -29,16 +29,16 @@ class TopBar extends StatelessWidget {
           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                const CircleAvatar(
-                  backgroundColor: Color.fromRGBO(0, 0, 255, 0),
-                  child: IconButton(
-                    onPressed: null,
-                    color: Colors.white,
-                    icon: Icon(Icons.settings, color: Colors.white, size: 27.5,),
-                  ),
-                ),
+                // const CircleAvatar(
+                //   backgroundColor: Color.fromRGBO(0, 0, 255, 0),
+                //   child: IconButton(
+                //     onPressed: null,
+                //     color: Colors.white,
+                //     icon: Icon(Icons.settings, color: Colors.white, size: 27.5,),
+                //   ),
+                // ),
                 CircleAvatar(
                   backgroundColor: const Color.fromRGBO(0, 0, 255, 0),
                   child: IconButton(

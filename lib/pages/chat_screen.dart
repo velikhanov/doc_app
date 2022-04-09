@@ -18,7 +18,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  _chatBubble(String message, time, bool isMe, bool isSameUser) {
+  _chatBubble(String message, time, bool isMe, bool isSameUser, bool firstMessage) {
     if (isMe) {
       return Column(
         children: <Widget>[
@@ -49,7 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          isSameUser
+          !isSameUser || firstMessage
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
@@ -117,7 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          isSameUser
+          !isSameUser || firstMessage
               ? Row(
                   children: <Widget>[
                     Container(
@@ -376,16 +376,22 @@ class _ChatScreenState extends State<ChatScreen> {
                         reverse: true, 
                         padding: const EdgeInsets.all(20),
                         itemCount: snapshot.data!.size,
+                        // itemCount: 1,
                         itemBuilder: (BuildContext context, int index) {
                           var _data = snapshot.data!.docs[index];
                           final String message = _data['message'];
                           final time = _data['timestamp'];
                           final bool isMe = _data['sender'] ==
                               FirebaseAuth.instance.currentUser!.uid;
-                          prevUserId = _data['sender'];
-                          final bool isSameUser =
-                              prevUserId == _data['sender'];
-                          return _chatBubble(message, time, isMe, isSameUser);
+                          // prevUserId = _data['sender'];
+                          int prevIndex = index == 0 ? index : index - 1;
+                          // bool lastMessage = index == snapshot.data!.docs.length - 1;
+                          // int nextIndex = lastMessage ? index : index + 1;
+                          prevUserId = snapshot.data!.docs[prevIndex]['sender'];
+                          // nextUserId = snapshot.data!.docs[nextIndex]['sender'];
+                          bool firstMessage = index == 0;
+                          final bool isSameUser = prevUserId == _data['sender'];
+                          return _chatBubble(message, time, isMe, isSameUser, firstMessage);
                         });
                     }else{
                       return Column(

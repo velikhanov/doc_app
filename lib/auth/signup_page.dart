@@ -47,6 +47,7 @@ class SignUpPageContent extends StatefulWidget {
 }
 
 class _SignUpPageContent extends State<SignUpPageContent> {
+  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordControllerConf = TextEditingController();
@@ -140,6 +141,23 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                 color: Colors.white),
             child: Column(
               children: <Widget>[
+                TextFormField(
+                  onTap: () {
+                    setState(() {
+                      _isVisible = false;
+                    });
+                  },
+                  controller: nameController, // Controller for Username
+                  decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Введите ваше имя",
+                      contentPadding: EdgeInsets.all(20)),
+                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                ),
+                const Divider(
+                  thickness: 7.5,
+                  color: Color.fromRGBO(40, 38, 56, 1),
+                ),
                 TextFormField(
                   onTap: () {
                     setState(() {
@@ -311,12 +329,13 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                 ),
               ),
               onPressed: () {
-                if(emailController.text.trim().isEmpty && passwordController.text.trim().isEmpty && passwordController.text.trim() != passwordControllerConf.text.trim()){
+                if(nameController.text.trim().isEmpty && emailController.text.trim().isEmpty && passwordController.text.trim().isEmpty && passwordController.text.trim() != passwordControllerConf.text.trim()){
                   return;
                 }else{
                   FocusManager.instance.primaryFocus?.unfocus();
                   if(isdoc == true){
                     context.read<AuthenticationService>().signUp(
+                      nameController.text.trim(),
                       emailController.text.trim(),
                       passwordController.text.trim(),
                       isdoc: isdoc,
@@ -330,6 +349,7 @@ class _SignUpPageContent extends State<SignUpPageContent> {
                     );
                   }else{
                     context.read<AuthenticationService>().signUp(
+                      nameController.text.trim(),
                       emailController.text.trim(),
                       passwordController.text.trim(),
                       userId: userId,

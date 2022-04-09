@@ -21,9 +21,10 @@ class CalendarPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                 margin: const EdgeInsets.only(top: 20, right: 20, left: 20, bottom: 10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(50)),
+                decoration: const BoxDecoration(
+                  // color: Theme.of(context).primaryColor,
+                  color: Colors.black,
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
                 ),
                 child: Text(
                   // DateFormat('MMMM yyyy').format(DateTime(year, month)),
@@ -61,10 +62,28 @@ class CalendarPage extends StatelessWidget {
         dayBuilder: (context, date) {
           return Column(
             children: [
-              Text(
-                DateFormat('d').format(date),
-                style: const TextStyle(fontSize: 20,),
-              ),
+              DateFormat('d').format(date) == DateFormat('d').format(DateTime.now()) 
+              ? Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                    color: Colors.black,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                  child: 
+                Text(
+                  DateFormat('d').format(date),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+              : Text(
+                  DateFormat('d').format(date),
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                ),
               const Divider(),
             ],
           );

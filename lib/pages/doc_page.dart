@@ -58,6 +58,34 @@ class DocPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    Future<void> _showMyDialog() async {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('AlertDialog Title'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: const <Widget>[
+                  Text('Выберите доступное время для записи'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Закрыть'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     final _query = getDoctorData(_collection, id: _id);
     return DefaultTextStyle(
       style: const TextStyle(
@@ -163,7 +191,7 @@ class DocPage extends StatelessWidget {
                               // 'Mahmuthan B',
                               // _data[]??'',
                               style: const TextStyle(
-                                fontSize: 40.0,
+                                fontSize: 35.0,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Pacifico',
@@ -196,7 +224,7 @@ class DocPage extends StatelessWidget {
                                   color: Colors.teal,
                                 ),
                                 title: Text(
-                                  _data?['phone_number'] ?? '',
+                                  _data?['phone_number'] ?? '+99-455-555-55-55',
                                   // '+90 506 922 92 21',
                                   style: TextStyle(
                                     fontSize: 20.0,
@@ -225,57 +253,77 @@ class DocPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Card(
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 140),
-                                child: TextButton(
-                                  onPressed: () {
-                                    _createChatSession(_data!['uid'],
-                                        FirebaseAuth.instance.currentUser!.uid);
-                                    Navigator.push(
-                                        context,
-                                        // MaterialPageRoute(builder: (context) => const ChatPage(),
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatScreen(
-                                              _data['uid'], _data['email']),
-                                        ));
-                                  },
-                                  // onPressed: (){},
-                                  // child: ListTile(
-                                  //   leading: const Icon(
-                                  //     Icons.chat_rounded,
-                                  //     color: Colors.teal,
-                                  //   ),
-                                  //   title: Text(
-                                  //     'Чат',
-                                  //     style: TextStyle(
-                                  //       fontSize: 20.0,
-                                  //       fontFamily: 'SourceSansPro',
-                                  //       fontWeight: FontWeight.bold,
-                                  //       color: Colors.teal.shade900,
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: <Widget>[
-                                      const Icon(
-                                        Icons.chat_rounded,
-                                        color: Colors.teal,
-                                      ),
-                                      Text(
-                                        'Чат',
-                                        style: TextStyle(
-                                          fontSize: 20.0,
-                                          fontFamily: 'SourceSansPro',
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.teal.shade900,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                              Card(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10),
+                                  child: TextButton(
+                                    onPressed: () {
+                                      _createChatSession(_data!['uid'],
+                                          FirebaseAuth.instance.currentUser!.uid);
+                                      Navigator.push(
+                                          context,
+                                          // MaterialPageRoute(builder: (context) => const ChatPage(),
+                                          MaterialPageRoute(
+                                            builder: (context) => ChatScreen(
+                                                _data['uid'], _data['email']),
+                                          ));
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        const Icon(
+                                          Icons.chat_rounded,
+                                          color: Colors.teal,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
+                                        Text(
+                                          'Чат',
+                                          style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontFamily: 'SourceSansPro',
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.teal.shade900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ),
+                              Card(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10),
+                                  child: TextButton(
+                                    onPressed: (){
+                                      _showMyDialog();
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        const Icon(
+                                          Icons.calendar_month,
+                                          color: Colors.teal,
+                                        ),
+                                        Text(
+                                          'Записаться',
+                                          // 'Записаться на прием',
+                                          style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontFamily: 'SourceSansPro',
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.teal.shade900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       );
