@@ -9,29 +9,29 @@ getCategoryData(String _collection) async {
       .collection('roles')
       .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
       .get();
-      
-    for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
-      if (element.data()['role'] == 'd') {
-        Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
-            .collection(_collection)
-            .where('for_d', isEqualTo: true)
-            .get();
 
-        return _snapshot;
-      } else if (element.data()['role'] == 'p') {
-        Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
-            FirebaseFirestore.instance.collection(_collection).get();
+  for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
+    if (element.data()['role'] == 'd') {
+      Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
+          .collection(_collection)
+          .where('for_d', isEqualTo: true)
+          .get();
 
-        return _snapshot;
-      }
+      return _snapshot;
+    } else if (element.data()['role'] == 'p') {
+      Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
+          FirebaseFirestore.instance.collection(_collection).get();
+
+      return _snapshot;
     }
+  }
 }
 
-getCategoriesSignUp(String _collection){
+getCategoriesSignUp(String _collection) {
   Future<QuerySnapshot<Map<String, dynamic>>> _snapshot =
-            FirebaseFirestore.instance.collection(_collection).get();
+      FirebaseFirestore.instance.collection(_collection).get();
 
-        return _snapshot;
+  return _snapshot;
 }
 
 getDoctorData(String _collection, {int? id, bool lastId = false}) {
@@ -57,14 +57,78 @@ getUserRole(String _collection) {
   return _snapshot;
 }
 
-getUserData() {
-  User? user = FirebaseAuth.instance.currentUser;
+// getChatMessages(String _collection) {
+//   Stream<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore
+//       .instance
+//       .collection(_collection)
+//       .orderBy('id_message', descending: true)
+//       .snapshots();
 
-  Future<QuerySnapshot<Map<String, dynamic>>> _snapshop = FirebaseFirestore
+//   return _snapshot;
+// }
+getChatMessages(String _collection) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore
       .instance
-      .collection('users')
-      .where('uid', isEqualTo: user!.uid)
+      .collection(_collection)
+      .orderBy('id_message', descending: true)
+      .snapshots();
+    return _snapshot;
+}
+
+getChats(String _collection, String uid) async {
+  QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
+      .instance
+      .collection('roles')
+      .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
       .get();
 
-  return _snapshop;
+  for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
+    if (element.data()['role'] == 'p') {
+      QuerySnapshot<Map<String, dynamic>> _getMemberUid =
+          await FirebaseFirestore.instance
+              .collection(_collection)
+              .where('member_1', isEqualTo: uid)
+              .get();
+      List _result = [];
+      List _responce = [];
+      for (QueryDocumentSnapshot<Map<String, dynamic>> el
+          in _getMemberUid.docs) {
+        QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore
+            .instance
+            .collection('chats/' + uid + '/' + el.data()['member_2'])
+            .get();
+        if (_snapshot.docs.isNotEmpty) {
+          _result.add(_snapshot.docs.last.data());
+        }
+      }
+      for (var _res in _result) {
+        _responce.add(_res);
+      }
+      return _responce;
+    } else if (element.data()['role'] == 'd') {
+      QuerySnapshot<Map<String, dynamic>> _getMemberUid =
+          await FirebaseFirestore.instance
+              .collection(_collection)
+              .where('member_2', isEqualTo: uid)
+              .get();
+
+      List _result = [];
+      List _responce = [];
+      for (QueryDocumentSnapshot<Map<String, dynamic>> el
+          in _getMemberUid.docs) {
+        QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore
+            .instance
+            .collection('chats/' + el.data()['member_1'] + '/' + uid)
+            .get();
+
+        if (_snapshot.docs.isNotEmpty) {
+          _result.add(_snapshot.docs.last.data());
+        }
+      }
+      for (var _res in _result) {
+        _responce.add(_res);
+      }
+      return _responce;
+    }
+  }
 }

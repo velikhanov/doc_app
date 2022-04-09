@@ -8,27 +8,51 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class DocPage extends StatelessWidget {
-
   final String _collection;
   final int _id;
 
   const DocPage(this._collection, this._id, {Key? key}) : super(key: key);
 
-  void _createChatSession(String userId, String docId){
-    Future<QuerySnapshot<Map<String, dynamic>>> _chatDocs = 
-    FirebaseFirestore.instance.collection('chats/' + docId.toString() + '/' + userId.toString()).get();
-    _chatDocs.then((value){
-        int newId = value.size == 0 ? 1 : value.size;
-        DocumentReference<Map<String, dynamic>> _chat = 
-        FirebaseFirestore.
-        instance.
-        collection('chats/' + docId.toString() + '/' + userId.toString()).
-        doc(newId.toString());
-        
-        _chat.set({
-          'user_id': userId,
-          'doc_id': docId
-        });
+  void _createChatSession(String docId, String userId) {
+    Future<QuerySnapshot<Map<String, dynamic>>> _chatDocs = FirebaseFirestore
+        .instance
+        .collection('chats/' + userId.toString() + '/' + docId.toString())
+        .get();
+
+    Future<QuerySnapshot<Map<String, dynamic>>> _allChatDocs =
+        FirebaseFirestore.instance.collection('all_chats').get();
+
+    Future<QuerySnapshot<Map<String, dynamic>>> _allChatsAlreadyExists =
+        FirebaseFirestore.instance
+            .collection('all_chats')
+            .where('member_1', isEqualTo: userId)
+            .where('member_2', isEqualTo: docId)
+            .get();
+    _allChatDocs.then((value) {
+      int newId = value.size == 0 ? 1 : value.size + 1;
+      _allChatsAlreadyExists.then((value) {
+        if (value.size == 0) {
+          DocumentReference<Map<String, dynamic>> _chat = FirebaseFirestore
+              .instance
+              .collection('all_chats')
+              .doc(newId.toString());
+
+          _chat.set({'member_1': userId, 'member_2': docId});
+        }
+      });
+    });
+    _chatDocs.then((value) {
+      int newId;
+      if (value.size == 0) {
+        newId = 1;
+
+        DocumentReference<Map<String, dynamic>> _chat = FirebaseFirestore
+            .instance
+            .collection('chats/' + userId.toString() + '/' + docId.toString())
+            .doc(newId.toString());
+
+        _chat.set({'id_message': 0});
+      }
     });
   }
 
@@ -57,17 +81,24 @@ class DocPage extends StatelessWidget {
                     color: const Color.fromARGB(255, 33, 124, 243),
                     child: IconButton(
                       onPressed: (() => Navigator.pop(context)),
-                      icon: const Icon(Icons.arrow_back_sharp, color: Colors.white,),
+                      icon: const Icon(
+                        Icons.arrow_back_sharp,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   Material(
                     color: const Color.fromARGB(255, 33, 124, 243),
                     child: IconButton(
                       onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomePage(),
-                      )),
-                      icon: const Icon(Icons.home, color: Colors.white,),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(),
+                          )),
+                      icon: const Icon(
+                        Icons.home,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -195,35 +226,56 @@ class DocPage extends StatelessWidget {
                               ),
                             ),
                             Card(
-                              margin: const EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 120.0),
-                              child: TextButton(
-                                onPressed: (){
-                                  _createChatSession(_data!['uid'], FirebaseAuth.instance.currentUser!.uid);
-                                  Navigator.push(
-                                    context,
-                                    // MaterialPageRoute(builder: (context) => const ChatPage(),
-                                    MaterialPageRoute(builder: (context) => ChatScreen(_data['uid'], _data['email']),
-                                  ));
-                                },
-                                // onPressed: (){},
-                                child: ListTile(
-                                  leading: const Icon(
-                                    Icons.chat_rounded,
-                                    color: Colors.teal,
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 140),
+                                child: TextButton(
+                                  onPressed: () {
+                                    _createChatSession(_data!['uid'],
+                                        FirebaseAuth.instance.currentUser!.uid);
+                                    Navigator.push(
+                                        context,
+                                        // MaterialPageRoute(builder: (context) => const ChatPage(),
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                              _data['uid'], _data['email']),
+                                        ));
+                                  },
+                                  // onPressed: (){},
+                                  // child: ListTile(
+                                  //   leading: const Icon(
+                                  //     Icons.chat_rounded,
+                                  //     color: Colors.teal,
+                                  //   ),
+                                  //   title: Text(
+                                  //     'Чат',
+                                  //     style: TextStyle(
+                                  //       fontSize: 20.0,
+                                  //       fontFamily: 'SourceSansPro',
+                                  //       fontWeight: FontWeight.bold,
+                                  //       color: Colors.teal.shade900,
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.chat_rounded,
+                                        color: Colors.teal,
+                                      ),
+                                      Text(
+                                        'Чат',
+                                        style: TextStyle(
+                                          fontSize: 20.0,
+                                          fontFamily: 'SourceSansPro',
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.teal.shade900,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  title: Text(
-                                    'Чат',
-                                    style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontFamily: 'SourceSansPro',
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.teal.shade900,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ),
+                                )),
                           ],
                         ),
                       );
