@@ -8,6 +8,8 @@ import 'package:doc_app/pages/test_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 
 class HomeTabs extends StatefulWidget {
   const HomeTabs({Key? key}) : super(key: key);
@@ -18,7 +20,7 @@ class HomeTabs extends StatefulWidget {
 
 class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
   var _category = getCategoryData('categories');
-  final _visitHistory = getVisitHistory(FirebaseAuth.instance.currentUser!.uid);
+  final Future<dynamic>? _plannedVisits = getPlannedVisits(FirebaseAuth.instance.currentUser!.uid);
   final List<String> _stack = ['categories'];
   bool _displayBack = false;
 
@@ -286,7 +288,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
               ),
               /////
               FutureBuilder(
-                  future: _visitHistory,
+                  future: _plannedVisits,
                   builder: (BuildContext context,
                       AsyncSnapshot snapshot) {
                     if (snapshot.hasError) {
@@ -324,12 +326,13 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                         ],
                       );
                     }
+                    
                     if (snapshot.hasData) {
                       if(snapshot.data!.docs.isNotEmpty && (snapshot.data!.docs[0].data()['name'] != null)){
                       return ListView.separated(
                           separatorBuilder: (BuildContext context, int index) =>
                               const SizedBox(),
-                          itemCount: snapshot.data!.size,
+                          itemCount: snapshot.data.size,
                           itemBuilder: (context, index) {
                             var _data = snapshot.data!.docs[index].data();
                             // _data = _data.data();
@@ -338,41 +341,42 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                             //   Map<String, dynamic> _data =
                             //       snapshot.data!.docs as Map<String, dynamic>;
                               return Card(
-                                  color: const Color.fromARGB(255, 0, 115, 153),
-                                  child: ListTile(
-                                      title: Text(((_data['role'] == 'p') ? (_data['doc_category_name'] + ' - ' + _data['name']) : _data['name']),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      subtitle: Text(_data['date'],
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      leading: const CircleAvatar(
-                                          backgroundImage: AssetImage(
-                                              'assets/images/home_img.png')),
-                                      // trailing: Icon(Icons.access_time_filled, color: Colors.black,)));
-                                      trailing: const Icon(
-                                        Icons.calendar_month,
-                                        color: Colors.black,
-                                      )));
+                                color: const Color.fromARGB(255, 0, 115, 153),
+                                child: ListTile(
+                                    title: Text(((_data['role'] == 'p') ? (_data['category'] + ' - ' + _data['name']) : _data['name']),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    // subtitle: Text(_data['date'],
+                                    subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(DateTime.fromMillisecondsSinceEpoch(_data['date']).toString())).toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    leading: const CircleAvatar(
+                                        backgroundImage: AssetImage(
+                                            'assets/images/home_img.png')),
+                                    // trailing: Icon(Icons.access_time_filled, color: Colors.black,)));
+                                    trailing: const Icon(
+                                      Icons.calendar_month,
+                                      color: Colors.black,
+                                    )));
                             // }
                             // }
                           });
                       }else{
                         return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const <Widget>[
-                          Flexible(
-                            child: Text(
-                              'Пока что здесь пусто',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const <Widget>[
+                            Flexible(
+                              child: Text(
+                                'Пока что здесь пусто',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
-                          ),
-                        ],
-                      );
+                          ],
+                        );
                       }
                     } else {
                       return Column(

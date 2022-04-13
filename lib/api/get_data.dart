@@ -63,7 +63,7 @@ getUserRole(String _collection) {
 
 // Get visit history list
 
-getVisitHistory(String _currentUser) async {
+getPlannedVisits(String _currentUser) async {
   QuerySnapshot<Map<String, dynamic>> _userRole = await FirebaseFirestore
       .instance
       .collection('roles')
@@ -72,21 +72,47 @@ getVisitHistory(String _currentUser) async {
 
   for (QueryDocumentSnapshot<Map<String, dynamic>> element in _userRole.docs) {
     if (element.data()['role'] == 'p') {
-      Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
-          .collection('visit_history')
-          .where('user_uid', isEqualTo: _currentUser)
+        // List _result = [];
+         QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore.instance
+          .collection('planned_visits/' + _currentUser + '/' + _currentUser)
+          // .where('user_uid', isEqualTo: _currentUser)
+          // .where('date', isGreaterThan: '')
+          .where('date', isGreaterThan: DateTime.now().millisecondsSinceEpoch)
+          // .orderBy('date')
           .get();
-
+          // for (var item in _snapshot.docs){
+          //   if(item.data()['date'] > DateTime.now().millisecondsSinceEpoch){
+          //     _result.add(item);
+          //   }
+          // }
       return _snapshot;
     } else if(element.data()['role'] == 'd') {
-      Future<QuerySnapshot> _snapshot = FirebaseFirestore.instance
-          .collection('todays_appointments')
-          .where('doc_uid', isEqualTo: _currentUser)
+      // List _result = [];
+      QuerySnapshot<Map<String, dynamic>> _snapshot = await FirebaseFirestore.instance
+          .collection('appointments/' + _currentUser + '/' + _currentUser)
+          // .where('doc_uid', isEqualTo: _currentUser)
+          // .where('date', isGreaterThan: '')
+          .where('date', isGreaterThan: DateTime.now().millisecondsSinceEpoch)
+          // .orderBy('date')
           .get();
-          
+          // for (var item in _snapshot.docs){
+          //   if(item.data()['date'] > DateTime.now().millisecondsSinceEpoch){
+          //     _result.add(item);
+          //   }
+          // }
       return _snapshot;
     }
   }
+}
+
+// Gets times for booking
+getTimesForBooking(){
+  Stream<QuerySnapshot<Map<String, dynamic>>> _snapshot = FirebaseFirestore
+      .instance
+      .collection('test')
+      .snapshots();
+
+  return _snapshot;
 }
 
 // Specific chat data

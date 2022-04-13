@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
+
   const HomePage({Key? key}) : super(key: key);
 
   @override
@@ -15,7 +16,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async => false,
+    child: Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: const <Widget>[
@@ -38,6 +41,7 @@ class _HomePageState extends State<HomePage> {
       //         MaterialPageRoute(builder: (context) => const ChatsPage(),
       //     ))),
       // ),
+    ),
     );
   }
 }
