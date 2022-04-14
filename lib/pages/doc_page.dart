@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doc_app/api/get_data.dart';
 import 'package:doc_app/pages/chat_screen.dart';
 import 'package:doc_app/pages/home_page.dart';
+import 'package:doc_app/widgets/home_tabs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -770,11 +771,12 @@ class DocPage extends StatelessWidget {
                       color: Colors.black,
                       child: IconButton(
                         // onPressed: (() => Navigator.pop(context, _collection)),
-                        onPressed: () => Navigator.push(
+                        onPressed: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomePage(),
-                            )),
+                              builder: (context) => HomePage(true, _collection)));
+                          },
                         icon: const Icon(
                           Icons.arrow_back_sharp,
                           color: Colors.white,
@@ -847,11 +849,14 @@ class DocPage extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              const CircleAvatar(
+                              CircleAvatar(
                                 radius: 100.0,
                                 // backgroundColor: Colors.red,
-                                backgroundImage:
-                                    AssetImage('assets/images/home_img.png'),
+                                backgroundImage: _data?['img'] != null && _data?['img'] != ""
+                                          ? AssetImage('assets/images/' + _data?['img'])
+                                          : const AssetImage('assets/images/home_img.png'),
+                                // backgroundImage:
+                                //     AssetImage('assets/images/home_img.png'),
                               ),
                               Text(
                                 _data?['name'] ?? '',
@@ -864,16 +869,35 @@ class DocPage extends StatelessWidget {
                                   fontFamily: 'Pacifico',
                                 ),
                               ),
-                              Text(
-                                _data?['category'] ?? '',
-                                // '',
-                                style: TextStyle(
-                                  fontFamily: 'SourceSansPro',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0,
-                                  color: Colors.teal.shade100,
-                                  letterSpacing: 1.5,
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 20, right: 1.5),
+                                  child: Text(
+                                    _data?['category'] ?? '',
+                                    // '',
+                                    style: TextStyle(
+                                      fontFamily: 'SourceSansPro',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0,
+                                      color: Colors.teal.shade100,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                  ),
+                                    (_data?['license'] != null &&
+                                      _data?['license'] == 0) 
+                                  ? const Icon(Icons.av_timer, color: Colors.yellow, size: 20,)
+                                  : (_data?['license'] != null && 
+                                        _data?['license'] == 1)
+                                  ? const Icon(Icons.check, color: Colors.green, size: 20,)
+                                  : (_data?['license'] != null && 
+                                        _data?['license'] == 2)
+                                      ? const Icon(Icons.close, color: Colors.red, size: 20,)
+                                      : const SizedBox(width: 0, height: 0,)
+                                ],
                               ),
                               SizedBox(
                                 height: 20.0,

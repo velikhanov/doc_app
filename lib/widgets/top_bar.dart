@@ -62,7 +62,7 @@ class TopBar extends StatelessWidget {
                 Column(
                   children: <Widget>[
                     Image.asset(
-                      'assets/images/home_img.png',
+                      'assets/images/user.png',
                       width: 75,
                       // height: 100,
                     ),

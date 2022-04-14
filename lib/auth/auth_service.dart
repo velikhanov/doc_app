@@ -48,7 +48,8 @@ class AuthenticationService {
             'id_category': categoryId.toInt(),
             'id_doctor': doctorId.toInt(),
             'email': email,
-            'uid': _result.user?.uid
+            'uid': _result.user?.uid,
+            'license': 0
           });
           _role.set({
             'uid': _result.user?.uid,

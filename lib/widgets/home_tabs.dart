@@ -12,7 +12,9 @@ import 'package:intl/intl.dart';
 
 
 class HomeTabs extends StatefulWidget {
-  const HomeTabs({Key? key}) : super(key: key);
+  final bool fromDocPage;
+  final String route;
+  const HomeTabs(this.fromDocPage, this.route, {Key? key}) : super(key: key);
 
   @override
   State<HomeTabs> createState() => _HomeTabsState();
@@ -24,6 +26,18 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
   final List<String> _stack = ['categories'];
   bool _displayBack = false;
 
+  @override
+  void initState(){
+    super.initState();
+    if(widget.fromDocPage == true && widget.route.isNotEmpty){
+      setState(() {
+        _stack.addAll(<String>['categories/1/doctors', widget.route]);
+        _category = getCategoryData(_stack.last);
+        _displayBack = true;
+      });
+    }
+  }
+
   void _initCategories(String _newCategory) {
     _displayBack = true;
     setState(() {
@@ -31,7 +45,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
       _stack.add(_newCategory);
     });
   }
-
+  
   void _returnOneStep() {
     if (_stack.length > 1) {
       _stack.removeLast();
@@ -215,11 +229,31 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                                               CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                            Text(data['category'],
-                                                style: const TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 1.5),
+                                                  child:
+                                                  Text(data['category'],
+                                                  style: const TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.bold)),  
+                                                  ),
+                                                    (data['license'] != null &&
+                                                        data['license'] == 0) 
+                                                    ? const Icon(Icons.av_timer, color: Colors.yellow, size: 20,)
+                                                    : (data['license'] != null && 
+                                                          data['license'] == 1)
+                                                    ? const Icon(Icons.check, color: Colors.green, size: 20,)
+                                                    : (data['license'] != null && 
+                                                          data['license'] == 2)
+                                                        ? const Icon(Icons.close, color: Colors.red, size: 20,)
+                                                        : const SizedBox(width: 0, height: 0,)
+                                              ],
+                                            ),
                                             data['name'] != null &&
                                                     data['uid'] != null
                                                 ? Text(data['name'],
@@ -243,15 +277,15 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                                           ],
                                         ),
                                         const Spacer(),
-                                        const CircleAvatar(
+                                        CircleAvatar(
                                           // backgroundColor: Colors.white,
                                           // ignore: todo
                                           // TODO: to check if image file exists to avoid problem with image loading when image name is incorrect in DB
-                                          // backgroundImage: data['img'] != "" && data['img'] != null
-                                          // ? AssetImage('assets/images/' + data['img'])
-                                          // : const AssetImage('assets/images/home_img.png'),
-                                          backgroundImage: AssetImage(
-                                              'assets/images/home_img.png'),
+                                          backgroundImage: data['img'] != null && data['img'] != ""
+                                          ? AssetImage('assets/images/' + data['img'])
+                                          : const AssetImage('assets/images/home_img.png'),
+                                          // backgroundImage: AssetImage(
+                                          //     'assets/images/home_img.png'),
                                         ),
                                       ],
                                     ),
@@ -352,7 +386,7 @@ class _HomeTabsState extends State<HomeTabs> with TickerProviderStateMixin {
                                             fontWeight: FontWeight.bold)),
                                     leading: const CircleAvatar(
                                         backgroundImage: AssetImage(
-                                            'assets/images/home_img.png')),
+                                            'assets/images/checklist.png')),
                                     // trailing: Icon(Icons.access_time_filled, color: Colors.black,)));
                                     trailing: const Icon(
                                       Icons.calendar_month,
