@@ -783,21 +783,21 @@ class DocPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Material(
-                    //   // color: const Color.fromARGB(255, 33, 124, 243),
-                    //   color: Colors.black,
-                    //   child: IconButton(
-                    //     onPressed: () => Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => HomePage(_collection),
-                    //         )),
-                    //     icon: const Icon(
-                    //       Icons.home,
-                    //       color: Colors.white,
-                    //     ),
-                    //   ),
-                    // ),
+                    Material(
+                      // color: const Color.fromARGB(255, 33, 124, 243),
+                      color: Colors.black,
+                      child: IconButton(
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(false, ''),
+                            )),
+                        icon: const Icon(
+                          Icons.home,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
